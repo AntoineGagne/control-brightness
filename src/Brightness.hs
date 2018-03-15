@@ -1,4 +1,10 @@
-module Brightness where
+module Brightness
+    ( listDevices
+    , displayBrightness
+    , setBrightnessPercentage
+    , readDevice
+    , getAllDevices
+    ) where
 
 import Control.Concurrent.Async ( Concurrently (..) )
 import Data.Map.Strict ( Map
@@ -31,12 +37,23 @@ data BrightnessDevice = BrightnessDevice
 listDevices :: Map FilePath FilePath -> IO ()
 listDevices devices = mapM_ putStrLn $ keys devices
 
-setBrightness :: Integer -> BrightnessDevice -> IO ()
-setBrightness level device =
-    let device' = device { brightness = level } in writeDevice device'
+displayBrightness :: BrightnessDevice -> IO ()
+displayBrightness = print . brightnessPercentage
 
-brightnessPercentage :: BrightnessDevice -> Double
-brightnessPercentage device = 
+setBrightnessPercentage :: Double -> BrightnessDevice -> IO ()
+setBrightnessPercentage n device@BrightnessDevice
+    { brightness = brightness'
+    , maximumBrightness = maximumBrightness'
+    } = setBrightness newBrightness device
+  where
+    newBrightness = floor $ n / 100 * fromInteger maximumBrightness' / fromInteger brightness'
+
+setBrightness :: Integer -> BrightnessDevice -> IO ()
+setBrightness n device =
+    let device' = device { brightness = n } in writeDevice device'
+
+brightnessPercentage :: BrightnessDevice -> Integer
+brightnessPercentage device = floor $
     fromInteger (actualBrightness device) / fromInteger (maximumBrightness device) * 100
 
 writeDevice :: BrightnessDevice -> IO ()
@@ -61,7 +78,6 @@ getAllDevices = do
     pure $ foldr1 union devices
   where
     controllers = ["/sys/class/backlight/", "/sys/class/leds/"]
-
 
 getControllerDevices :: FilePath -> IO (Map FilePath FilePath)
 getControllerDevices controllerPath = do
