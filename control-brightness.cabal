@@ -1,0 +1,47 @@
+name:                control-brightness
+version:             0.1.0
+synopsis:            A command line tool to control screen brightness
+homepage:            https://github.com/githubuser/control-brightness#readme
+license:             MIT
+license-file:        LICENSE
+author:              Antoine Gagné
+maintainer:          antoine.gagne.2@ulaval.ca
+copyright:           2018 Antoine Gagné
+category:            Web
+build-type:          Simple
+extra-source-files:  README.rst
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Brightness
+  build-depends:       base >= 4.7 && < 5
+                     , filemanip
+                     , directory
+                     , easy-file
+                     , containers
+                     , async
+  default-language:    Haskell2010
+
+executable control-brightness
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , control-brightness
+  default-language:    Haskell2010
+
+test-suite control-brightness-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , control-brightness
+                     , hspec
+                     , QuickCheck
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/githubuser/control-brightness
