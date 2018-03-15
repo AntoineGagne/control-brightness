@@ -4,6 +4,7 @@ module Brightness
     , setBrightnessPercentage
     , readDevice
     , getAllDevices
+    , BrightnessDevice
     ) where
 
 import Control.Concurrent.Async ( Concurrently (..) )
