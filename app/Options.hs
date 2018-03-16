@@ -31,7 +31,7 @@ import qualified Brightness
 
 data Options = ListDevices
              | OtherCommand 
-                 { device :: Maybe FilePath
+                 { device :: FilePath
                  , otherCommand :: BrightnessCommand
                  }
 
@@ -43,13 +43,12 @@ parseOptions :: Parser Options
 parseOptions = listDevices
     <|> OtherCommand <$> parseDeviceOption <*> parseBrightnessCommand
 
-parseDeviceOption :: Parser (Maybe FilePath)
-parseDeviceOption = optional $
-    option auto ( long "device" 
-               <> metavar "DEVICE"
-               <> value "intel_brightness"
-               <> help "the device to use"
-                )
+parseDeviceOption :: Parser FilePath
+parseDeviceOption = option auto ( long "device"
+                               <> metavar "DEVICE"
+                               <> value "intel_brightness"
+                               <> help "the device to use"
+                                )
 
 listDevices :: Parser Options
 listDevices = hsubparser $
