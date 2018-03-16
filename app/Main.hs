@@ -8,6 +8,7 @@ import Brightness ( listDevices
                   , setBrightnessPercentage
                   , getAllDevices
                   , readDevice
+                  , addBrightnessValue
                   )
 import Options ( Options (..)
                , options
@@ -30,9 +31,7 @@ runOtherCommand OtherCommand
         case otherCommand' of
             DisplayBrightness -> displayBrightness device'
             ChangeBrightness n -> setBrightnessPercentage n device'
-
-
-
+            AddBrightnessValue n -> addBrightnessValue n device'
 
 main :: IO ()
 main = do

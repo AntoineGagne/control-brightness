@@ -47,6 +47,7 @@ data Options = ListDevices
 data BrightnessCommand
     = DisplayBrightness
     | ChangeBrightness Integer
+    | AddBrightnessValue Integer
     deriving (Show)
 
 options :: ParserInfo Options
@@ -79,12 +80,17 @@ parseBrightnessCommand :: Parser BrightnessCommand
 parseBrightnessCommand = hsubparser $
     command "display" (displayBrightness `withInfo` "Display the device's current brightness.")
     <> command "set" (changeBrightness `withInfo` "Set the device's brightness value.")
+    <> command "add" (addBrightnessValue `withInfo` "Add the value to current brightness.")
 
 withInfo :: Parser a -> String -> ParserInfo a
 withInfo options description = info (helper <*> options) $ progDesc description
 
 displayBrightness :: Parser BrightnessCommand
 displayBrightness = pure DisplayBrightness
+
+addBrightnessValue :: Parser BrightnessCommand
+addBrightnessValue = AddBrightnessValue
+    <$> argument brightnessValue (metavar "BRIGHTNESS_VALUE")
 
 changeBrightness :: Parser BrightnessCommand
 changeBrightness = ChangeBrightness

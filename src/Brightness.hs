@@ -5,6 +5,7 @@ module Brightness
     , readDevice
     , getAllDevices
     , BrightnessDevice
+    , addBrightnessValue
     ) where
 
 import Control.Concurrent.Async ( Concurrently (..) )
@@ -41,13 +42,21 @@ listDevices devices = mapM_ putStrLn $ keys devices
 displayBrightness :: BrightnessDevice -> IO ()
 displayBrightness = print . brightnessPercentage
 
+addBrightnessValue :: Integer -> BrightnessDevice -> IO ()
+addBrightnessValue n device@BrightnessDevice
+    { brightness = brightness'
+    } = setBrightness (normalizeValue (brightness' + n)) device
+
+normalizeValue :: Integer -> Integer
+normalizeValue = max 0 . min 100
+
 setBrightnessPercentage :: Integer -> BrightnessDevice -> IO ()
 setBrightnessPercentage n device@BrightnessDevice
     { brightness = brightness'
     , maximumBrightness = maximumBrightness'
     } = setBrightness newBrightness device
   where
-    newBrightness = max 0 $ min n' maximumBrightness'
+    newBrightness = normalizeValue n'
     n' = floor $ fromInteger n / 100 * fromInteger maximumBrightness' / fromInteger brightness'
 
 setBrightness :: Integer -> BrightnessDevice -> IO ()
