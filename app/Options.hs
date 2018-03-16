@@ -1,4 +1,8 @@
-module Options where
+module Options
+    ( options
+    , Options (..)
+    , BrightnessCommand (..)
+    ) where
 
 import Control.Applicative ( (<|>)
                            , (*>)
@@ -20,6 +24,10 @@ import Options.Applicative ( str
                            , helper
                            , option
                            , value
+                           , (<**>)
+                           , fullDesc
+                           , header
+                           , infoOption
                            )
 import Options.Applicative.Types ( Parser
                                  , ParserInfo
@@ -34,10 +42,23 @@ data Options = ListDevices
                  { device :: FilePath
                  , otherCommand :: BrightnessCommand
                  }
+                 deriving (Show)
 
 data BrightnessCommand
     = DisplayBrightness
     | ChangeBrightness Integer
+    deriving (Show)
+
+options :: ParserInfo Options
+options = 
+    info (parseOptions <**> helper <**> versionOptions)
+         (fullDesc
+        <> progDesc "Controls screen's brightness."
+        <> header "control-brightness"
+         )
+  where
+      versionOptions = 
+          infoOption "control-brightness v0.0.0" (long "version" <> help "display the version")
 
 parseOptions :: Parser Options
 parseOptions = listDevices
@@ -46,7 +67,7 @@ parseOptions = listDevices
 parseDeviceOption :: Parser FilePath
 parseDeviceOption = option auto ( long "device"
                                <> metavar "DEVICE"
-                               <> value "intel_brightness"
+                               <> value "intel_backlight"
                                <> help "the device to use"
                                 )
 
@@ -72,6 +93,6 @@ changeBrightness = ChangeBrightness
 brightnessValue :: ReadM Integer
 brightnessValue = do
     i <- auto
-    if i < 0 || i > 100
+    if i >= 0 && i <= 100
         then pure i
         else readerError "New brightness value must be between 0 and 100."
