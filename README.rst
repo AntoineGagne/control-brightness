@@ -2,7 +2,7 @@ control-brightness
 ==================
 
 :Author:
-    `Antoine Gagné <antoine.gagne.2@ulaval.ca>`_,
+    `Antoine Gagné <antoine.gagne.2@ulaval.ca>`_
 
 .. contents::
     :backlinks: none
