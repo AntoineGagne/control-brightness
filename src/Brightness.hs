@@ -41,13 +41,14 @@ listDevices devices = mapM_ putStrLn $ keys devices
 displayBrightness :: BrightnessDevice -> IO ()
 displayBrightness = print . brightnessPercentage
 
-setBrightnessPercentage :: Double -> BrightnessDevice -> IO ()
+setBrightnessPercentage :: Integer -> BrightnessDevice -> IO ()
 setBrightnessPercentage n device@BrightnessDevice
     { brightness = brightness'
     , maximumBrightness = maximumBrightness'
     } = setBrightness newBrightness device
   where
-    newBrightness = floor $ n / 100 * fromInteger maximumBrightness' / fromInteger brightness'
+    newBrightness = max 0 $ min n' maximumBrightness'
+    n' = floor $ fromInteger n / 100 * fromInteger maximumBrightness' / fromInteger brightness'
 
 setBrightness :: Integer -> BrightnessDevice -> IO ()
 setBrightness n device =
