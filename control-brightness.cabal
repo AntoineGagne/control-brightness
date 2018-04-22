@@ -21,6 +21,7 @@ library
                      , easy-file
                      , containers
                      , async
+                     , lens
   default-language:    Haskell2010
 
 executable control-brightness

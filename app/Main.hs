@@ -1,19 +1,23 @@
 module Main where
 
-import Data.Map.Strict ( (!) )
-import Options.Applicative ( execParser )
+import Data.Map.Strict
+    ( (!) )
+import Options.Applicative
+    ( execParser )
 
-import Brightness ( listDevices
-                  , displayBrightness
-                  , setBrightnessPercentage
-                  , getAllDevices
-                  , readDevice
-                  , addBrightnessValue
-                  )
-import Options ( Options (..)
-               , options
-               , BrightnessCommand (..)
-               )
+import Brightness
+    ( listDevices
+    , displayBrightness
+    , setBrightnessPercentage
+    , getAllDevices
+    , readDevice
+    , addBrightnessValue
+    )
+import Options
+    ( Options (..)
+    , options
+    , BrightnessCommand (..)
+    )
 
 run :: Options -> IO ()
 run options' 

@@ -4,45 +4,50 @@ module Options
     , BrightnessCommand (..)
     ) where
 
-import Control.Applicative ( (<|>)
-                           , (*>)
-                           , optional
-                           )
-import Data.Monoid ( (<>) )
-import Options.Applicative ( str
-                           , command
-                           , auto
-                           , readerError
-                           , argument
-                           , metavar
-                           , short
-                           , long
-                           , hsubparser
-                           , info
-                           , help
-                           , progDesc
-                           , helper
-                           , option
-                           , value
-                           , (<**>)
-                           , fullDesc
-                           , header
-                           , infoOption
-                           )
-import Options.Applicative.Types ( Parser
-                                 , ParserInfo
-                                 , ReadM
-                                 )
+import Control.Applicative
+    ( (<|>)
+    , (*>)
+    , optional
+    )
+import Data.Monoid
+    ( (<>) )
+import Options.Applicative
+    ( str
+    , command
+    , auto
+    , readerError
+    , argument
+    , metavar
+    , short
+    , long
+    , hsubparser
+    , info
+    , help
+    , progDesc
+    , helper
+    , option
+    , value
+    , (<**>)
+    , fullDesc
+    , header
+    , infoOption
+    )
+import Options.Applicative.Types
+    ( Parser
+    , ParserInfo
+    , ReadM
+    )
 
 import qualified Brightness
 
 
-data Options = ListDevices
-             | OtherCommand 
-                 { device :: FilePath
-                 , otherCommand :: BrightnessCommand
-                 }
-                 deriving (Show)
+data Options 
+    = ListDevices
+    | OtherCommand 
+        { device :: FilePath
+        , otherCommand :: BrightnessCommand
+        }
+        deriving (Show)
 
 data BrightnessCommand
     = DisplayBrightness
@@ -66,11 +71,11 @@ parseOptions = listDevices
     <|> OtherCommand <$> parseDeviceOption <*> parseBrightnessCommand
 
 parseDeviceOption :: Parser FilePath
-parseDeviceOption = option auto ( long "device"
+parseDeviceOption = option str ( long "device"
                                <> metavar "DEVICE"
                                <> value "intel_backlight"
                                <> help "the device to use"
-                                )
+                               )
 
 listDevices :: Parser Options
 listDevices = hsubparser $
@@ -90,7 +95,7 @@ displayBrightness = pure DisplayBrightness
 
 addBrightnessValue :: Parser BrightnessCommand
 addBrightnessValue = AddBrightnessValue
-    <$> argument brightnessValue (metavar "BRIGHTNESS_VALUE")
+    <$> argument auto (metavar "BRIGHTNESS_VALUE")
 
 changeBrightness :: Parser BrightnessCommand
 changeBrightness = ChangeBrightness

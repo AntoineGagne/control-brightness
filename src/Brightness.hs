@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Brightness
     ( listDevices
     , displayBrightness
@@ -8,33 +10,45 @@ module Brightness
     , addBrightnessValue
     ) where
 
-import Control.Concurrent.Async ( Concurrently (..) )
-import Data.Map.Strict ( Map
-                       , insert
-                       , empty
-                       , union
-                       , keys
-                       )
-import System.EasyFile ( (</>)
-                       , takeBaseName
-                       )
-import System.FilePath.Find ( fileType
-                            , find
-                            , depth
-                            , (==?)
-                            , (/=?)
-                            , (||?)
-                            , FileType ( Directory
-                                       , SymbolicLink
-                                       )
-                            )
+import Control.Concurrent.Async
+    ( Concurrently (..) )
+import Control.Lens
+    ( makeLenses
+    , (^.)
+    , (.~)
+    , (&)
+    )
+import Data.Map.Strict 
+    ( Map
+    , insert
+    , empty
+    , union
+    , keys
+    )
+import System.EasyFile
+    ( (</>)
+    , takeBaseName
+    )
+import System.FilePath.Find
+    ( fileType
+    , find
+    , depth
+    , (==?)
+    , (/=?)
+    , (||?)
+    , FileType
+        ( Directory
+        , SymbolicLink
+        )
+    )
 
 data BrightnessDevice = BrightnessDevice
-    { actualBrightness :: Integer
-    , maximumBrightness :: Integer
-    , brightness :: Integer
-    , device :: FilePath
+    { _actualBrightness :: Integer
+    , _maximumBrightness :: Integer
+    , _brightness :: Integer
+    , _device :: FilePath
     } deriving (Show)
+makeLenses ''BrightnessDevice
 
 listDevices :: Map FilePath FilePath -> IO ()
 listDevices devices = mapM_ putStrLn $ keys devices
@@ -43,35 +57,27 @@ displayBrightness :: BrightnessDevice -> IO ()
 displayBrightness = print . brightnessPercentage
 
 addBrightnessValue :: Integer -> BrightnessDevice -> IO ()
-addBrightnessValue n device@BrightnessDevice
-    { brightness = brightness'
-    } = setBrightness (normalizeValue (brightness' + n)) device
+addBrightnessValue n device = setBrightness (normalizeValue (device^.brightness + n)) device
 
 normalizeValue :: Integer -> Integer
 normalizeValue = max 0 . min 100
 
 setBrightnessPercentage :: Integer -> BrightnessDevice -> IO ()
-setBrightnessPercentage n device@BrightnessDevice
-    { brightness = brightness'
-    , maximumBrightness = maximumBrightness'
-    } = setBrightness newBrightness device
+setBrightnessPercentage n device = setBrightness newBrightness device
   where
     newBrightness = normalizeValue n'
-    n' = floor $ fromInteger n / 100 * fromInteger maximumBrightness' / fromInteger brightness'
+    n' = floor $ fromInteger n / 100 * fromInteger (device^.maximumBrightness) / fromInteger (device^.brightness)
 
 setBrightness :: Integer -> BrightnessDevice -> IO ()
-setBrightness n device =
-    let device' = device { brightness = n } in writeDevice device'
+setBrightness n device = writeDevice (device & brightness .~ n)
 
 brightnessPercentage :: BrightnessDevice -> Integer
 brightnessPercentage device = floor $
-    fromInteger (actualBrightness device) / fromInteger (maximumBrightness device) * 100
+    fromInteger (device^.actualBrightness ) / fromInteger (device^.maximumBrightness) * 100
 
 writeDevice :: BrightnessDevice -> IO ()
-writeDevice BrightnessDevice
-    { brightness = brightness'
-    , device = path'
-    } = writeFile (path' </> "brightness") (show brightness')
+writeDevice device' =
+    writeFile (device'^.device </> "brightness") (show (device'^.brightness))
 
 readDevice :: FilePath -> IO BrightnessDevice
 readDevice devicePath = runConcurrently $
@@ -84,16 +90,14 @@ readDevice devicePath = runConcurrently $
       readIntegerFromFile path = read <$> readFile (devicePath </> path)
 
 getAllDevices :: IO (Map FilePath FilePath)
-getAllDevices = do
-    devices <- mapM getControllerDevices controllers
-    pure $ foldr1 union devices
+getAllDevices =
+    foldr1 union <$> mapM getControllerDevices controllers
   where
     controllers = ["/sys/class/backlight/", "/sys/class/leds/"]
 
 getControllerDevices :: FilePath -> IO (Map FilePath FilePath)
-getControllerDevices controllerPath = do
-    devices <- find (depth ==? 0) (isDirectory ||? isSymbolicLink) controllerPath
-    pure $ foldr f empty devices
+getControllerDevices controllerPath =
+    foldr f empty <$> find (depth ==? 0) (isDirectory ||? isSymbolicLink) controllerPath
   where
     f device m = 
         let name = takeBaseName device
