@@ -1,0 +1,46 @@
+#compdef control-brightness
+
+_control-brightness() {
+    typeset -A opt_args
+    local state
+    _arguments \
+        '(-h --help)'{-h,--help}'[display the help text and exit]' \
+        '--version[display the version and exit]' \
+        '1:control-brightness commands:->commands' \
+        '*:: :->command_arguments'
+
+
+    case $state in
+        commands)
+            local commands
+            commands=(
+                'list:list the available devices'
+                'display:display the current brightness of the device'
+                'set:set the brightness value of the device'
+                'add:add the value to the current brightness of the device'
+            )
+            _describe -t commands 'control-brightness command' commands
+            ;;
+
+        command_arguments)
+            case $words[1] in
+                display)
+                    _arguments \
+                        '--device[the device to use]:DEVICE:($(control-brightness list))'
+                    ;;
+                set)
+                    _arguments \
+                        '--device[the device to use]:DEVICE:($(control-brightness list))' \
+                        '1::VALUE:()'
+                    ;;
+                add)
+                    _arguments \
+                        '--device[the device to use]:DEVICE:($(control-brightness list))' \
+                        '1::VALUE:()'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_control-brightness "${@}"
