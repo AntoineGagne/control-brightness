@@ -44,8 +44,8 @@ import qualified Brightness
 data Options 
     = ListDevices
     | OtherCommand 
-        { device :: FilePath
-        , otherCommand :: BrightnessCommand
+        { otherCommand :: BrightnessCommand
+        , device :: FilePath
         }
         deriving (Show)
 
@@ -68,7 +68,7 @@ options =
 
 parseOptions :: Parser Options
 parseOptions = listDevices
-    <|> OtherCommand <$> parseDeviceOption <*> parseBrightnessCommand
+    <|> OtherCommand <$> parseBrightnessCommand <*> parseDeviceOption 
 
 parseDeviceOption :: Parser FilePath
 parseDeviceOption = option str ( long "device"
