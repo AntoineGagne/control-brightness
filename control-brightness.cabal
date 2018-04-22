@@ -1,7 +1,7 @@
 name:                control-brightness
 version:             0.1.0
 synopsis:            A command line tool to control screen brightness
-homepage:            https://github.com/githubuser/control-brightness#readme
+homepage:            https://github.com/AntoineGagne/control-brightness#readme
 license:             MIT
 license-file:        LICENSE
 author:              Antoine Gagné
@@ -26,6 +26,7 @@ library
 
 executable control-brightness
   hs-source-dirs:      app
+  other-modules:       Options
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
@@ -49,4 +50,4 @@ test-suite control-brightness-test
 
 source-repository head
   type:     git
-  location: https://github.com/githubuser/control-brightness
+  location: https://github.com/AntoineGagne/control-brightness
